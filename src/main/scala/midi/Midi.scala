@@ -39,10 +39,13 @@ object Midi {
     }
   }
 
-  def toNote(events: (Event, Event)): Option[Note] = {
-    events._1.message match {
+  def toNote(pair: (Event, Event)): Option[Note] = {
+    pair._1.message match {
       case NoteOn(_, pitch, _) => Note.from(pitch)
       case _ => None
     }
   }
+
+  def toNotes(pairs: Either[String, List[(Event, Event)]]): Either[String, List[Note]] =
+    pairs.map(_.flatMap(toNote))
 }

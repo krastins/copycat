@@ -3,7 +3,8 @@ package midi
 import de.sciss.midi.{Event, NoteOff, NoteOn}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import midi.Midi.groupNotes
+import midi.Midi.{groupNotes, toNotes}
+import model.{Note, NoteName}
 
 class MidiSpec extends AnyFlatSpec with Matchers {
   val fifth = List(
@@ -95,5 +96,10 @@ class MidiSpec extends AnyFlatSpec with Matchers {
       Event(0, NoteOn(0, 65, 100))
     )) shouldBe Left("Unmatched groups")
 
+  }
+
+  "toNotes" should "convert list of grouped notes to list of internal note representation" in {
+    import NoteName._
+    toNotes(groupNotes(fifth)) shouldBe Right(List(Note(G,3), Note(G,3), Note(G,3), Note(DSharp,3)))
   }
 }
