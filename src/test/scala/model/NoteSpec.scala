@@ -5,7 +5,7 @@ import org.scalatest.matchers.should.Matchers
 
 class NoteSpec extends AnyFlatSpec with Matchers {
 
-  import Name._
+  import NoteName._
 
   "note" should "be parsed from MIDI pitch" in {
     Note.from(0) should contain (Note(name = C, octave = -2))
