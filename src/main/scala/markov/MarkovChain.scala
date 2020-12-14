@@ -16,14 +16,22 @@ case class MarkovChain[S, N <: Nat](transitions: Map[Sized[Seq[S], N], Transitio
   def transitionProbability(from: Sized[Seq[S], N], to: S): Double =
     transitions.get(from).map(_.getProbability(to)).getOrElse(0)
 
-  def transitionsFor(state: Sized[Seq[S], N]): List[(S, Double)] =
-    transitions.get(state).map(_.toList).getOrElse(List[(S, Double)]())
+  def transitionsFor(state: Sized[Seq[S], N]): Option[List[(S, Double)]] =
+    transitions.get(state).map(_.toList)
+
+  // TODO: Think about a nicer way to do this
+  def fallbackTransitions(state: Sized[Seq[S], N]): List[(S, Double)] = {
+    if(state.size > 1) {
+      transitions.filter { case (k: Sized[Seq[S], N], _) => k.tail == state.tail }
+        .values.flatMap(_.toList).toList
+    } else List.empty[(S, Double)]
+  }
 
   def states(): Iterable[Sized[Seq[S], N]] = transitions.keys
 
   def generateNext(s: Sized[Seq[S], N]): Option[S] = {
     val probabilities: List[S] = for {
-      (state, probability) <- transitionsFor(s)
+      (state, probability) <- transitionsFor(s).getOrElse(fallbackTransitions(s))
       frequency = Math.round(probability * 100).toInt
       nextState <- List.fill(frequency)(state)
     } yield nextState

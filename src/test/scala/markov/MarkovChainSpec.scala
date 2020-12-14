@@ -41,4 +41,20 @@ class MarkovChainSpec extends AnyFlatSpec with Matchers {
       .addTransition(Sized("D", "A"), "B")
     chain.generateSequence(Sized("A", "B"), 10) shouldBe List("A", "B", "C", "D", "A", "B", "C", "D", "A", "B")
   }
+
+  "generateSequence" should "try to fallback to one order lower if transition is missing" in {
+    val chain = emptyChain
+      .addTransition(Sized("F", "A"), "B")
+      .addTransition(Sized("A", "B"), "C")
+      .addTransition(Sized("B", "C"), "A")
+    chain.generateSequence(Sized("A", "B"), 8) shouldBe List("A", "B", "C", "A", "B", "C", "A", "B")
+  }
+
+  "generateSequence" should "terminate early if the chain is not looping" in {
+    val chain = emptyChain
+      .addTransition(Sized("A", "B"), "C")
+      .addTransition(Sized("B", "C"), "D")
+    chain.generateSequence(Sized("A", "B"), 8) shouldBe List("A", "B", "C", "D")
+  }
+
 }
