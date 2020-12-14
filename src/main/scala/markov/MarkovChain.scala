@@ -49,7 +49,7 @@ case class MarkovChain[S, N <: Nat](transitions: Map[Sized[Seq[S], N], Transitio
         case Some(next) =>
           val nextFrom: Sized[Seq[S], N] = Sized.wrap(from.toList.tail :+ next)
           generateSequence(nextFrom, length - 1, from.unsized.head :: sequence)
-        case None => sequence.reverse
+        case None => sequence.reverse ::: from.toList
       }
     else sequence.reverse
 }
