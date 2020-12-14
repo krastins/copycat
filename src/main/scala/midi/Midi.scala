@@ -14,19 +14,21 @@ object Midi {
       case _ => false
     })
 
+  private def splitOnMatchingNoteOff(thisPitch: Int, events: List[Event]): (List[Event], List[Event]) =
+    events.span(_.message match {
+      case NoteOff(_, thatPitch, _) => thisPitch != thatPitch
+      case _ => true
+    })
+
   // This is a little bit of a monstrosity, but so is MIDI
-  // TODO: Break up the nested cases into smaller functions
   @tailrec
   def groupNotes(events: Seq[Event], grouped: List[(Event, Event)] = List()): Either[String, List[(Event, Event)]] = {
     events match {
       case Nil => Right(grouped.reverse)
       case event :: rest => event.message match {
         case NoteOn(_, thisPitch, _) =>
-          val (preceding, maybeEvents) = rest.span(_.message match {
-            case NoteOff(_, thatPitch, _) => thisPitch != thatPitch
-            case _ => true
-          })
-          maybeEvents match {
+          val (preceding, noteOffWithTail) = splitOnMatchingNoteOff(thisPitch, rest)
+          noteOffWithTail match {
             case noteOff :: following => groupNotes(preceding ::: following, (event, noteOff) :: grouped)
             case Nil => Left("Unmatched groups")
           }
