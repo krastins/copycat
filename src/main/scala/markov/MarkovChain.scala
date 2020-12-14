@@ -1,25 +1,27 @@
 package markov
 
+import shapeless.{Nat, Sized, _}
+
 import scala.annotation.tailrec
 import scala.collection.immutable.List
 import scala.util.Random
 
-case class MarkovChain[S](transitions: Map[S, TransitionCount[S]] = Map[S, TransitionCount[S]]()) {
-
-  def addTransition(from: S, to: S): MarkovChain[S] =
+case class MarkovChain[S, N <: Nat](transitions: Map[Sized[Seq[S], N], TransitionCount[S]] = Map[Sized[Seq[S], N], TransitionCount[S]]()) {
+  
+  def addTransition(from: Sized[Seq[S], N], to: S): MarkovChain[S, N] =
     MarkovChain(transitions.updatedWith(from)(maybeOld =>
       maybeOld.orElse(Some(TransitionCount.empty[S]))
         .map(_.addTransition(to))))
 
-  def transitionProbability(from: S, to: S): Double =
+  def transitionProbability(from: Sized[Seq[S], N], to: S): Double =
     transitions.get(from).map(_.getProbability(to)).getOrElse(0)
 
-  def transitionsFor(state: S): List[(S, Double)] =
+  def transitionsFor(state: Sized[Seq[S], N]): List[(S, Double)] =
     transitions.get(state).map(_.toList).getOrElse(List[(S, Double)]())
 
-  def states(): Iterable[S] = transitions.keys
+  def states(): Iterable[Sized[Seq[S], N]] = transitions.keys
 
-  def generateNext(s: S): Option[S] = {
+  def generateNext(s: Sized[Seq[S], N]): Option[S] = {
     val probabilities: List[S] = for {
       (state, probability) <- transitionsFor(s)
       frequency = Math.round(probability * 100).toInt
@@ -32,12 +34,13 @@ case class MarkovChain[S](transitions: Map[S, TransitionCount[S]] = Map[S, Trans
     })
   }
 
-  // TODO: Higher order chains
   @tailrec
-  final def generateSequence(from: S, length: Int, sequence: List[S] = List.empty[S]): List[S] =
+  final def generateSequence(from: Sized[Seq[S], N], length: Int, sequence: List[S] = List.empty[S]): List[S] =
     if (length > 0)
       generateNext(from) match {
-        case Some(next) => generateSequence(next, length - 1, from :: sequence)
+        case Some(next: S) =>
+          val nextFrom: Sized[Seq[S], N] = Sized.wrap(from.toList.tail :+ next)
+          generateSequence(nextFrom, length - 1, from.unsized.head :: sequence)
         case None => sequence.reverse
       }
     else sequence.reverse
