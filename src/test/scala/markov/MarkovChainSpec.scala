@@ -7,7 +7,7 @@ import shapeless.Sized
 
 class MarkovChainSpec extends AnyFlatSpec with Matchers {
 
-  val emptyChain: MarkovChain[String, _2] = MarkovChain[String, _2]()
+  val emptyChain: MarkovChain[String, _2] = MarkovChain.empty[String, _2]
 
   "transitionProbability" should "be zero if the chain is empty" in {
     emptyChain.transitionProbability(Sized("A", "B"), "C") shouldBe 0
