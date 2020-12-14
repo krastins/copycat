@@ -60,7 +60,7 @@ class MidiSpec extends AnyFlatSpec with Matchers {
     ))
   }
 
-  "groupNotes" should "handle out of order events" in {
+  it should "handle out of order events" in {
     groupNotes(List(
       Event(48, NoteOff(0, 62, 64)),
       Event(48, NoteOn(0, 62, 100)),
@@ -72,7 +72,7 @@ class MidiSpec extends AnyFlatSpec with Matchers {
     ))
   }
 
-  "groupNotes" should "fail if there's an unmatched NoteOff message" in {
+  it should "fail if there's an unmatched NoteOff message" in {
     groupNotes(List(
       Event(48, NoteOff(0, 62, 64)),
       Event(48, NoteOn(0, 62, 100)),
@@ -80,7 +80,7 @@ class MidiSpec extends AnyFlatSpec with Matchers {
     )) shouldBe Left("Unmatched groups")
   }
 
-  "groupNotes" should "fail if there's an unmatched NoteOn message" in {
+  it should "fail if there's an unmatched NoteOn message" in {
     groupNotes(List(
       Event(48, NoteOff(0, 62, 64)),
       Event(48, NoteOn(0, 62, 100)),
@@ -88,7 +88,7 @@ class MidiSpec extends AnyFlatSpec with Matchers {
     )) shouldBe Left("Unmatched groups")
   }
 
-  "groupNotes" should "fail if the pitch doesn't match between a pair of messages" in {
+  it should "fail if the pitch doesn't match between a pair of messages" in {
     groupNotes(List(
       Event(48, NoteOff(0, 62, 64)),
       Event(48, NoteOn(0, 63, 100)),
