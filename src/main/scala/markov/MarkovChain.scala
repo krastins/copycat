@@ -1,6 +1,7 @@
 package markov
 
-import shapeless.{Nat, Sized, _}
+import shapeless.{Nat, Sized}
+import shapeless.Nat.{_1, _2, _3, _4}
 
 import scala.annotation.tailrec
 import scala.collection.immutable.List
@@ -56,6 +57,35 @@ case class MarkovChain[S, N <: Nat](transitions: Map[Sized[Seq[S], N], Transitio
 object MarkovChain {
   def empty[S, N <: Nat]: MarkovChain[S, N] =
     MarkovChain(Map.empty[Sized[Seq[S], N], TransitionCount[S]])
+
+  def accumulateTransitions[S, N <: Nat](transitions: Seq[(Sized[Seq[S], N], S)]): MarkovChain[S, N] =
+    transitions.foldLeft(MarkovChain.empty[S, N])((chain, tup) => tup match {
+      case (from, to) => chain.addTransition(from, to)
+    })
+
+  def firstOrder[S](states: List[S]): MarkovChain[S, _1] = {
+    val transitions = (states ++ states.take(1)).sliding(2, 1).toList
+        .map { case List(a, b) => Sized(a) -> b }
+    accumulateTransitions[S, _1](transitions)
+  }
+
+  def secondOrder[S](states: List[S]): MarkovChain[S, _2] = {
+    val transitions = (states ++ states.take(2)).sliding(3, 1).toList
+        .map { case List(a, b, c) => Sized(a, b) -> c }
+    accumulateTransitions[S, _2](transitions)
+  }
+
+  def thirdOrder[S](states: List[S]): MarkovChain[S, _3] = {
+    val transitions = (states ++ states.take(3)).sliding(4, 1).toList
+        .map { case List(a, b, c, d) => Sized(a, b, c) -> d }
+    accumulateTransitions[S, _3](transitions)
+  }
+
+  def fourthOrder[S](states: List[S]): MarkovChain[S, _4] = {
+    val transitions = (states ++ states.take(4)).sliding(5, 1).toList
+        .map { case List(a, b, c, d, e) => Sized(a, b, c, d) -> e }
+    accumulateTransitions[S, _4](transitions)
+  }
 }
 
 case class TransitionCount[S] (transitionCount: Map[S, Int]) {
