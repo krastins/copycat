@@ -13,11 +13,8 @@ object Main extends App {
         val notes: List[Note] = inputMelody.toNotes
         val rhythm: List[RhythmicElement] = inputMelody.toRhythm
 
-        val generatedRhythm = MarkovChain.fourthOrder(rhythm)
-          .generateSequence(Sized.wrap(rhythm.take(4)),100)
-
-        val generatedMelody = MarkovChain.fourthOrder(notes)
-          .generateSequence(Sized.wrap(notes.take(4)), generatedRhythm.count(_.isAudible))
+        val generatedRhythm = MarkovChain.generateSequenceOfOrder(rhythm, 4, 100)
+        val generatedMelody = MarkovChain.generateSequenceOfOrder(notes, 1, generatedRhythm.count(_.isAudible))
 
         val midiSequence: Either[String, Sequence] = createMidiSequence(zip(generatedRhythm, generatedMelody))
         midiSequence match {

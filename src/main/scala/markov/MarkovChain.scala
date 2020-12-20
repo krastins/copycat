@@ -86,6 +86,13 @@ object MarkovChain {
         .map { case List(a, b, c, d, e) => Sized(a, b, c, d) -> e }
     accumulateTransitions[S, _4](transitions)
   }
+
+  def generateSequenceOfOrder[S](input: List[S], order: Int, length: Int): List[S] = (order match {
+    case 1 => MarkovChain.firstOrder(input)
+    case 2 => MarkovChain.secondOrder(input)
+    case 3 => MarkovChain.thirdOrder(input)
+    case 4 => MarkovChain.fourthOrder(input)
+  }).generateSequence(Sized.wrap(input.take(order)), length)
 }
 
 case class TransitionCount[S] (transitionCount: Map[S, Int]) {
