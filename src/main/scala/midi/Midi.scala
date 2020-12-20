@@ -77,12 +77,21 @@ object Midi {
     }})
   }
 
+  // our ScalaMIDI library puts the tempo events in a separate first track
+  // so if we want feed back our outputs as new inputs, we need to take events from the next track
+  def getEvents(sequence: Sequence): List[Event] =
+    if (sequence.tracks.size == 1)
+      sequence.tracks(0).events.toList
+    else if (sequence.tracks.size > 1 && filterNoteEvents(sequence.tracks(0).events).isEmpty) {
+      sequence.tracks(1).events.toList
+    } else List.empty[Event]
+
   def readMidiNotes(inputFile: String): Either[String, Melody] = {
     import cats.implicits._
     val path = Paths.get(inputFile).toAbsolutePath.toString
     for {
       sequence <- Try(Sequence.read(path)).toEither.leftMap(_.getMessage)
-      events = sequence.tracks(0).events.toList
+      events = getEvents(sequence)
       noteEvents = filterNoteEvents(events)
       grouped = groupNotes(noteEvents)
       sequence <- toNotesWithRests(grouped)
@@ -129,7 +138,7 @@ object Midi {
     for {
       eventList <- midiEventsFrom(notes)
       events = eventList.toIndexedSeq
-      lastTick = events.map(_.tick).max
+      lastTick <- if (events.nonEmpty) Right(events.map(_.tick).max) else Left("Sequence is empty")
       track = Track(events, lastTick + tickRate.value.toLong) // pad with extra second
       sequence = Sequence(Vector(track))
     } yield sequence
