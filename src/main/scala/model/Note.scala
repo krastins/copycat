@@ -33,7 +33,12 @@ object NoteLength extends Enumeration {
 
 import model.NoteName.NoteName
 import model.NoteLength._
-case class Note(name: NoteName, octave: Int, length: NoteLength = Eight) {
+
+sealed trait NoteOrRest {
+  val length: NoteLength
+}
+
+case class Note(name: NoteName, octave: Int, override val length: NoteLength = Eight) extends NoteOrRest {
   def toMidiPitch: Either[String, Int] = {
     val pitch = name.id + 12 * octave + 24
     if ((0 to 127).contains(pitch)) Right(pitch) else Left(f"Pitch out of range: $pitch")
@@ -47,4 +52,11 @@ object Note {
       name <- NoteName.fromInt(midiPitch % 12)
       length <- NoteLength.fromInt(midiTicks)
     } yield Note(name, midiPitch / 12 - 2, length)
+}
+
+case class Rest(override val length: NoteLength = Quarter) extends NoteOrRest
+
+object Rest {
+  def from(midiTicks: Int): Option[Rest] =
+    NoteLength.fromInt(midiTicks).map(Rest.apply)
 }
