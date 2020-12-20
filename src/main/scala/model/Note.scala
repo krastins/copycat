@@ -1,38 +1,20 @@
 package model
 
+object NoteName extends Enumeration {
+  type NoteName = Value
+  // no way to distinguish sharps from flats, because we don't know the scale
+  // so let's call all accidentals sharp. this seems to be what Ableton is doing with their piano roll
+  val C, CSharp, D, DSharp, E, F, FSharp, G, GSharp, A, ASharp, B = Value
+  def fromInt(value: Int): Option[NoteName] = values.find(_.id == value)
+}
 
-sealed abstract class NoteName private (val value: Int)
 
-// TODO: Think about how to better represent notes, since an accidental may have two different names based on the scale
-// Maybe I need to infer (or best guess) the scale from the input pattern
-// But it's probably just fine to incorrectly call them all sharp
-object NoteName {
-  case object C extends NoteName(0)
-  case object CSharp extends NoteName(1)
-  //  case object DFlat extends NoteName(1)
-  case object D extends NoteName(value = 2)
-  case object DSharp extends NoteName(value = 3)
-  //  case object EFlat extends NoteName(value = 3)
-  case object E extends NoteName(value = 4)
-  case object F extends NoteName(value = 5)
-  case object FSharp extends NoteName(value = 6)
-  //  case object GFlat extends NoteName(value = 6)
-  case object G extends NoteName(value = 7)
-  case object GSharp extends NoteName(value = 8)
-  //  case object AFlat extends NoteName(value = 8)
-  case object A extends NoteName(value = 9)
-  case object ASharp extends NoteName(value = 10)
-  //  case object BFlat extends NoteName(value = 10)
-  case object B extends NoteName(value = 11)
-
-  val values: List[NoteName] = List(C, CSharp, D, DSharp, E, F, FSharp, G, GSharp, A, ASharp, B)
-
-  def from(value: Int): Option[NoteName] = NoteName.values.find(_.value == value)
 }
 
 case class Note(name: NoteName, octave: Int)
 
 object Note {
+  // MIDI note 0 = C-2; MIDI note 24 = C0, aligned with Ableton Live
   def from(midiPitch: Int): Option[Note] =
-    NoteName.from(midiPitch % 12).map(Note(_ , midiPitch / 12 -2)) // MIDI note 0 = C-2; MIDI note 24 = C0,
+    NoteName.fromInt(midiPitch % 12).map(Note(_, midiPitch / 12 - 2))
 }
