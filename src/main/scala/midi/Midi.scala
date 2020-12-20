@@ -2,7 +2,7 @@ package midi
 
 import de.sciss.midi.{Event, NoteOff, NoteOn, Sequence, TickRate, Track}
 import model.NoteLength.NoteLength
-import model.{Melody, Note, NoteLength, NoteOrRest, Rest}
+import model.{Melody, Note, NoteLength, NoteOrRest, Rest, RhythmicElement}
 
 import java.nio.file.Paths
 import scala.annotation.tailrec
@@ -94,6 +94,15 @@ object Midi {
     val ticksPerQuarterNote = ticksPerSecond * 60 / Bpm
     (noteLength.id.toDouble / NoteLength.TicksPerQuarterNote * ticksPerQuarterNote).toLong
   }
+
+  def zip(rhythm: List[RhythmicElement], notes: List[Note]): List[NoteOrRest] =
+    rhythm.foldLeft((List.empty[NoteOrRest], notes))((acc, element) => {
+      val (result, notes) = acc
+      element match {
+        case RhythmicElement(length, true) => (notes.head.copy(length = length) :: result, notes.drop(1))
+        case RhythmicElement(length, false) => (Rest(length) :: result, notes)
+      }
+    })._1
 
   def midiEventsFrom(notes: List[NoteOrRest]): Either[String, List[Event]] = {
     import cats.implicits._

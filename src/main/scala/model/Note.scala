@@ -61,4 +61,16 @@ object Rest {
     NoteLength.fromInt(midiTicks).map(Rest.apply)
 }
 
-case class Melody(sequence: List[NoteOrRest])
+case class RhythmicElement(length: NoteLength, isAudible: Boolean)
+
+case class Melody(sequence: List[NoteOrRest]) {
+  def toRhythm: List[RhythmicElement] = sequence.map {
+    case Note(_, _, length) => RhythmicElement(length, isAudible = true)
+    case Rest(length) => RhythmicElement(length, isAudible = false)
+  }
+
+  def toNotes: List[Note] = sequence.filter {
+    case Note(_, _, _) => true
+    case _ => false
+  }.map(_.asInstanceOf[Note])
+}
