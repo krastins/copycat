@@ -3,8 +3,10 @@ package midi
 import de.sciss.midi.{Event, NoteOff, NoteOn}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import midi.Midi.{groupNotes, toNotes}
-import model.{Note, NoteName}
+import midi.Midi.{groupNotes, toNotesWithRests, readMidiNotes}
+import model.{Melody, Note, NoteLength, NoteName, NoteOrRest, Rest}
+import NoteName._
+import NoteLength._
 
 class MidiSpec extends AnyFlatSpec with Matchers {
 
@@ -136,10 +138,17 @@ class MidiSpec extends AnyFlatSpec with Matchers {
     )) shouldBe Left("Unmatched groups")
   }
 
+  "toNotesWithRests" should "handle rests" in {
+    toNotesWithRests(groupNotes(fifthMidi)) shouldBe Right(fifthInternal)
   }
 
-  "toNotes" should "convert list of grouped notes to list of internal note representation" in {
-    import NoteName._
-    toNotes(groupNotes(fifth)) shouldBe Right(List(Note(G,3), Note(G,3), Note(G,3), Note(DSharp,3)))
+  "readMidiNotes" should "parse notes" in {
+    val notes = readMidiNotes(getClass.getResource("oriental.mid").getPath)
+    notes shouldBe Right(Melody(orientalInternal))
+  }
+
+  it should "handle notes with rests" in {
+    val notes = readMidiNotes(getClass.getResource("fifth.mid").getPath)
+    notes shouldBe Right(Melody(fifthInternal))
   }
 }

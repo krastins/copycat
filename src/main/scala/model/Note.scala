@@ -60,3 +60,5 @@ object Rest {
   def from(midiTicks: Int): Option[Rest] =
     NoteLength.fromInt(midiTicks).map(Rest.apply)
 }
+
+case class Melody(sequence: List[NoteOrRest])
