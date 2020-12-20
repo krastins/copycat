@@ -46,4 +46,51 @@ class NoteSpec extends AnyFlatSpec with Matchers {
     Note(B, -3).toMidiPitch shouldBe Left("Pitch out of range: -1")
     Note(GSharp, 8).toMidiPitch shouldBe Left("Pitch out of range: 128")
   }
+
+  "fromInt" should  "calculate match the exact " in {
+    import NoteLength._
+    NoteLength.fromInt(6) shouldBe Some(SixtyFourth)
+    NoteLength.fromInt(12) shouldBe Some(ThirtySecond)
+    NoteLength.fromInt(24) shouldBe Some(Sixteenth)
+    NoteLength.fromInt(48) shouldBe Some(Eight)
+    NoteLength.fromInt(96) shouldBe Some(Quarter)
+    NoteLength.fromInt(192) shouldBe Some(Half)
+    NoteLength.fromInt(384) shouldBe Some(Full)
+  }
+
+  it should  "round to nearest known note length" in {
+    import NoteLength._
+    NoteLength.fromInt(1) shouldBe Some(SixtyFourth)
+    NoteLength.fromInt(5) shouldBe Some(SixtyFourth)
+    NoteLength.fromInt(7) shouldBe Some(SixtyFourth)
+    NoteLength.fromInt(10) shouldBe Some(ThirtySecond)
+    NoteLength.fromInt(13) shouldBe Some(ThirtySecond)
+    NoteLength.fromInt(20) shouldBe Some(Sixteenth)
+    NoteLength.fromInt(28) shouldBe Some(Sixteenth)
+    NoteLength.fromInt(44) shouldBe Some(Eight)
+    NoteLength.fromInt(51) shouldBe Some(Eight)
+    NoteLength.fromInt(99) shouldBe Some(Quarter)
+    NoteLength.fromInt(170) shouldBe Some(Half)
+    NoteLength.fromInt(200) shouldBe Some(Half)
+    NoteLength.fromInt(369) shouldBe Some(Full)
+    NoteLength.fromInt(400) shouldBe Some(Full)
+  }
+
+  it should "be biased towards the shorter note" in {
+    import NoteLength._
+    NoteLength.fromInt(23) shouldBe Some(Sixteenth)
+    NoteLength.fromInt(24) shouldBe Some(Sixteenth)
+    NoteLength.fromInt(45) shouldBe Some(Eight)
+    NoteLength.fromInt(45) shouldBe Some(Eight)
+    NoteLength.fromInt(21) shouldBe Some(Sixteenth)
+    NoteLength.fromInt(26) shouldBe Some(Sixteenth)
+    NoteLength.fromInt(51) shouldBe Some(Eight)
+    NoteLength.fromInt(55) shouldBe Some(Eight)
+    NoteLength.fromInt(25) shouldBe Some(Sixteenth)
+    NoteLength.fromInt(31) shouldBe Some(Sixteenth)
+    NoteLength.fromInt(58) shouldBe Some(Eight)
+    // this note is just an eight note which is held a little longer
+    NoteLength.fromInt(76) shouldBe Some(Eight)
+    NoteLength.fromInt(277) shouldBe Some(Half)
+  }
 }
