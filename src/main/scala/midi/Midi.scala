@@ -20,9 +20,9 @@ object Midi {
       case _ => true
     })
 
-  // This is a little bit of a monstrosity, but so is MIDI
+  // we need to group the note on and note off events, since they can be out of order in the MIDI file
   @tailrec
-  def groupNotes(events: Seq[Event], grouped: List[(Event, Event)] = List()): Either[String, List[(Event, Event)]] = {
+  def groupNotes(events: Seq[Event], grouped: List[(Event, Event)] = List.empty): Either[String, List[(Event, Event)]] = {
     events match {
       case Nil => Right(grouped.reverse)
       case event :: rest => event.message match {
