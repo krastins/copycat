@@ -148,7 +148,7 @@ class MidiSpec extends AnyFlatSpec with Matchers {
   }
 
   "readMidiNotes" should "handle notes with rests" in {
-    val notes = readMidiNotes(getClass.getResource("no5.mid").getPath)
+    val notes = readMidiNotes(getClass.getResource("fifth.mid").getPath)
     notes shouldBe Right(Melody(fifthInternal))
   }
 
