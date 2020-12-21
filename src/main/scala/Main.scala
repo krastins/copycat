@@ -1,8 +1,9 @@
-import de.sciss.midi.Sequence
-import markov.MarkovChain
+import markov.{MarkovChain, MarkovInput, SeqOrder}
 import midi.Midi.{createMidiSequence, readMidiNotes, writeMidiToFile, zip}
-import model.{Melody, Note, NoteOrRest, Rest, RhythmicElement}
-import shapeless.Sized
+import model.{Melody, Note, RhythmicElement}
+import cats.syntax.either._
+import shapeless.Nat
+import SeqOrder.instances._
 
 object Main extends App {
   val res: String = args match {
@@ -10,13 +11,15 @@ object Main extends App {
     case Array(a) => readMidiNotes(a) match {
       case Left(errorMessage) => "Couldn't parse input file: " + errorMessage
       case Right(inputMelody: Melody) =>
-        val notes: List[Note] = inputMelody.toNotes
-        val rhythm: List[RhythmicElement] = inputMelody.toRhythm
 
-        val generatedRhythm = MarkovChain.generateSequenceOfOrder(rhythm, 4, 100)
-        val generatedMelody = MarkovChain.generateSequenceOfOrder(notes, 1, generatedRhythm.count(_.isAudible))
+        val midiSequence = for {
+          notesInput <- MarkovInput.ofOrder[Note, Nat._4](inputMelody.toNotes).leftMap(_.toString)
+          rhythmInput <- MarkovInput.ofOrder[RhythmicElement, Nat._1](inputMelody.toRhythm).leftMap(_.toString)
+          rhythm = MarkovChain.generateSequenceOfOrder(rhythmInput, 100)
+          melody = MarkovChain.generateSequenceOfOrder(notesInput, rhythm.count(_.isAudible))
+          midi <- createMidiSequence(zip(rhythm, melody))
+        } yield midi
 
-        val midiSequence: Either[String, Sequence] = createMidiSequence(zip(generatedRhythm, generatedMelody))
         midiSequence match {
           case Right(sequence) =>
             writeMidiToFile(sequence, "output.mid")

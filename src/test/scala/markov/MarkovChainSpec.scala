@@ -56,24 +56,24 @@ class MarkovChainSpec extends AnyFlatSpec with Matchers {
       .addTransition(Sized("B", "C"), "D")
     chain.generateSequence(Sized("A", "B"), 8) shouldBe List("A", "B", "C", "D")
   }
-
-  "firstOrder" should "form a first order markov chain from a list" in {
-    val chain = MarkovChain.firstOrder(List("A", "B", "C", "D"))
-    chain.generateSequence(Sized("A"), 8) shouldBe List("A", "B", "C", "D", "A", "B", "C", "D")
-  }
-
-  "secondOrder" should "form a second order markov chain from a list" in {
-    val chain = MarkovChain.secondOrder(List("A", "B", "C", "D"))
-    chain.generateSequence(Sized("A", "B"), 8) shouldBe List("A", "B", "C", "D", "A", "B", "C", "D")
-  }
-
-  "thirdOrder" should "form a third order markov chain from a list" in {
-    val chain = MarkovChain.thirdOrder(List("A", "B", "C", "D"))
-    chain.generateSequence(Sized("A", "B", "C"), 8) shouldBe List("A", "B", "C", "D", "A", "B", "C", "D")
-  }
-
-  "fourthOrder" should "form a fourth order markov chain from a list" in {
-    val chain = MarkovChain.fourthOrder(List("A", "B", "C", "D", "E"))
-    chain.generateSequence(Sized("A", "B", "C", "D"), 8) shouldBe List("A", "B", "C", "D", "E", "A", "B", "C")
-  }
+//
+//  "firstOrder" should "form a first order markov chain from a list" in {
+//    val chain = MarkovChain.firstOrder(List("A", "B", "C", "D"))
+//    chain.generateSequence(Sized("A"), 8) shouldBe List("A", "B", "C", "D", "A", "B", "C", "D")
+//  }
+//
+//  "secondOrder" should "form a second order markov chain from a list" in {
+//    val chain = MarkovChain.secondOrder(List("A", "B", "C", "D"))
+//    chain.generateSequence(Sized("A", "B"), 8) shouldBe List("A", "B", "C", "D", "A", "B", "C", "D")
+//  }
+//
+//  "thirdOrder" should "form a third order markov chain from a list" in {
+//    val chain = MarkovChain.thirdOrder(List("A", "B", "C", "D"))
+//    chain.generateSequence(Sized("A", "B", "C"), 8) shouldBe List("A", "B", "C", "D", "A", "B", "C", "D")
+//  }
+//
+//  "fourthOrder" should "form a fourth order markov chain from a list" in {
+//    val chain = MarkovChain.fourthOrder(List("A", "B", "C", "D", "E"))
+//    chain.generateSequence(Sized("A", "B", "C", "D"), 8) shouldBe List("A", "B", "C", "D", "E", "A", "B", "C")
+//  }
 }
