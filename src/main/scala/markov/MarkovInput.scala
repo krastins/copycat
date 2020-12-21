@@ -22,4 +22,9 @@ object MarkovInput {
 
     Either.cond(input.length >= order.id, MarkovInput[S, N](input, order), InputIsTooShort(input, order))
   }
+
+  private[markov] def ofOrderUnsafe[S, N <: Nat : HasOrder](input: List[S]): MarkovInput[S, N] = ofOrder(input) match {
+    case Right(input) => input
+    case Left(error) => throw new Exception(error.toString)
+  }
 }
